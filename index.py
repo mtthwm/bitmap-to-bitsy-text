@@ -67,7 +67,5 @@ with open("output.txt", "w") as output:
 
         output.write("\n")
 
-        for key, value in tilemap.items():
-            output.write(f"TIL {value}\n{key}\n")
-
-    output.write("\n")
+    for key, value in tilemap.items():
+        output.write(f"TIL {value}\n{key}\n")
