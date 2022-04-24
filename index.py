@@ -1,4 +1,3 @@
-from typing import Set, ValuesView
 from PIL import Image
 import sys
 
@@ -14,55 +13,61 @@ BLANK = \
 "00000000\n"
 BLANK_VALUE = "0"
 
-filename = sys.argv[1]
-suffix = sys.argv[2]
-
-img = Image.open(filename)
-height, width = img.size
-
+filenames_start_at = int((len(sys.argv) / 2) + 1)
+filenames = sys.argv[filenames_start_at:]
+suffixes = sys.argv[1:filenames_start_at]
 tilemap = {}
 
-
-
 with open("output.txt", "w") as output:
-    output.write(f"ROOM {suffix}\n")
+    for i in range(len(filenames)):
+        suffix = suffixes[i]
+        filename = filenames[i]
 
-    # Loops which iterate over tiles
-    for y in range(0, height, 8):
-        for x in range(0, width, 8):
+        img = Image.open(filename)
+        height, width = img.size
 
-            current_tile = ""
-    
-            # Read individual tiles
-            for j in range(8):
-                for i in range(8):
-                    px = img.getpixel((x+i, y+j))
 
-                    if (px != ALT_PIX):
-                        current_tile += "1"
-                    else:
-                        current_tile += "0"
+        output.write(f"ROOM {suffix}\n")
 
-                current_tile += "\n"
+        # Loops which iterate over tiles
+        for y in range(0, height, 8):
+            for x in range(0, width, 8):
 
-            if current_tile != BLANK:
-                # Add tile to the tilemap, if it doesn't already occur
-                print(current_tile)
-                
-                if not current_tile in tilemap.keys():
-                    tilemap[current_tile] = f"{x+i}_{y+j}_" + suffix
+                current_tile = ""
+        
+                # Read individual tiles
+                for j in range(8):
+                    for i in range(8):
+                        px = img.getpixel((x+i, y+j))
 
-                output.write(f"{tilemap[current_tile]}")
+                        if (px != ALT_PIX):
+                            current_tile += "1"
+                        else:
+                            current_tile += "0"
 
-            else:
-                output.write(BLANK_VALUE)
+                    current_tile += "\n"
 
-            if (x + i + 1) % width == 0:
-                output.write("\n")
-            else:
-                output.write(",")
+                # If the tile is completely blank, replace it with the constant "0"
+                if current_tile != BLANK:
+                    # Add tile to the tilemap, if it doesn't already occur
+                    
+                    if not current_tile in tilemap.keys():
+                        tilemap[current_tile] = f"{x+i}_{y+j}_" + suffix
+
+                    output.write(f"{tilemap[current_tile]}")
+
+                else:
+                    output.write(BLANK_VALUE)
+
+                # Add comments and line breaks as necessary
+                if (x + i + 1) % width == 0:
+                    output.write("\n")
+                else:
+                    output.write(",")
+
+        output.write("\n")
+
+        for key, value in tilemap.items():
+            output.write(f"TIL {value}\n{key}\n")
 
     output.write("\n")
-
-    for key, value in tilemap.items():
-        output.write(f"TIL {value}\n{key}\n")
